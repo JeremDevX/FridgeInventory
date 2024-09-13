@@ -1,21 +1,10 @@
-import CodeBarScanner from "@/components/CodeBarScanner";
-import { useState } from "react";
-import { Text, View, StyleSheet, Button } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
-export default function Index() {
-  const [toggleScanner, setToggleScanner] = useState(false);
+export default function index() {
   return (
     <View style={styles.container}>
-      <Button
-        title="Scanner"
-        onPress={() => setToggleScanner(!toggleScanner)}
-      />
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-      {toggleScanner && (
-        <View style={styles.scannerContainer}>
-          <CodeBarScanner />
-        </View>
-      )}
+      <Text style={styles.text}>Application "Frigo"{`\n`}</Text>
+      <Text style={styles.text}>React Native + Expo{`\n`}</Text>
     </View>
   );
 }
@@ -23,11 +12,9 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    backgroundColor: "white",
+    alignContent: "center",
+    justifyContent: "center",
   },
-  scannerContainer: {
-    flex: 1,
-    width: "100%",
-    alignItems: "center",
-  },
+  text: { textAlign: "center" },
 });

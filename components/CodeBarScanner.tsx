@@ -3,7 +3,7 @@ import {
   useCameraPermissions,
   BarcodeScanningResult,
 } from "expo-camera";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   StyleSheet,
@@ -26,12 +26,38 @@ export default function CodeBarScanner() {
     return (
       <View style={styles.container}>
         <Text style={styles.message}>
-          We need your permission to show the camera
+          Nous avons besoin de votre permission pour accéder à la caméra.
         </Text>
         <Button onPress={requestPermission} title="grant permission" />
       </View>
     );
   }
+
+  const addItemToFrigo = async (name: string) => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://192.168.50.81:3000/api/items", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: name,
+            quantity: 1,
+          }),
+        });
+        const result = await response.json();
+        console.log(result);
+        Alert.alert("Réussite", "Produit ajouté au frigo", [
+          { text: "OK", onPress: () => setScanned(false) },
+        ]);
+      } catch (error) {
+        console.log(error + "failed to add item to frigo");
+      }
+    };
+    fetchData();
+  };
+
   const handleBarcodeScanned = (scanningResult: BarcodeScanningResult) => {
     if (!scanned) {
       console.log(scanningResult);
@@ -44,9 +70,19 @@ export default function CodeBarScanner() {
           );
           const data = await response.json();
           setLoadingScannedData(false);
-          Alert.alert("Product :", `${data.product.product_name}`, [
+          let productName;
+          if (data.product.product_name === "" || null || undefined) {
+            productName = data.product.product_name_en;
+          } else {
+            productName = data.product.product_name;
+          }
+
+          Alert.alert("Product :", `${productName}`, [
             { text: "OK", onPress: () => setScanned(false) },
-            { text: "Ajouter au frigo", onPress: () => setScanned(false) },
+            {
+              text: "Ajouter au frigo",
+              onPress: () => addItemToFrigo(productName),
+            },
           ]);
         } catch (error) {
           setLoadingScannedData(false);
@@ -64,8 +100,6 @@ export default function CodeBarScanner() {
     <View style={styles.container}>
       <CameraView
         style={styles.camera}
-        facing={"back"}
-        autofocus="off"
         barcodeScannerSettings={{
           barcodeTypes: [
             "aztec",
@@ -83,60 +117,53 @@ export default function CodeBarScanner() {
           ],
         }}
         onBarcodeScanned={handleBarcodeScanned}
-      >
-        {loadingScannedData && (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>
-              Code barre scanné, chargement des données en cours...
-            </Text>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        )}
-        <View style={styles.buttonContainer}></View>
-      </CameraView>
+      ></CameraView>
+      {loadingScannedData && (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
+            Code barre scanné, veuillez patienter, chargement des données en
+            cours...
+          </Text>
+          <ActivityIndicator size="large" color="black" />
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    alignItems: "center",
     justifyContent: "center",
-    width: 350,
-    height: 250,
+    position: "relative",
   },
   message: {
     textAlign: "center",
     paddingBottom: 10,
   },
   camera: {
-    flex: 1,
-  },
-  buttonContainer: {
-    flex: 1,
-    flexDirection: "row",
-    backgroundColor: "transparent",
-    margin: 64,
-  },
-  button: {
-    flex: 1,
-    alignSelf: "flex-end",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
+    width: 350,
+    height: 350,
+    borderRadius: 10,
   },
   loadingContainer: {
+    position: "absolute",
     width: 250,
-    height: "auto",
-    alignItems: "center",
+    height: 150,
+    padding: 10,
+    borderRadius: 10,
     margin: "auto",
-    marginTop: 150,
-    backgroundColor: "gray",
+    backgroundColor: "white",
+    borderStyle: "solid",
+    borderWidth: 2,
+    borderColor: "red",
   },
   loadingText: {
-    marginTop: 125,
     textAlign: "center",
+    color: "black",
+    marginBottom: 25,
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
