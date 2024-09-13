@@ -1,6 +1,6 @@
 # Basic Fridge Inventory
 -------
-## /!\ This app is not finished and will not be, this is just a basic app to test possibilites and learn some features on React Native ( like /!\
+## /!\ This app is not finished and will not be, this is just a basic app to test possibilites and learn some features on React Native /!\
 -----
 First little project with Expo
 ----
